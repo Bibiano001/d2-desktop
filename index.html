@@ -4,71 +4,393 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>D2 — Baixar o programa</title>
-  <meta name="description" content="Programa do D2 para Windows: compartilhamento de tela com os amigos.">
+  <meta name="description" content="D2 para Windows: compartilhe a tela com os amigos, com o som do jogo.">
+  <meta property="og:title" content="D2 — Compartilhe a tela com os amigos">
+  <meta property="og:description" content="Programa grátis para Windows, com até 60 quadros por segundo.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%230e1120'/%3E%3Cg transform='translate(32 32) scale(1.18) translate(-32.6 -35.4)'%3E%3Cpath fill='%23ffb84d' d='M20 22h24c5 0 8.5 3.2 9.8 9l2.6 11.6c.9 4.2-2 7.6-6 6.2-2.4-.8-4.2-2.4-6-4.3-.9-1-2-1.5-3.2-1.5H24c-1.2 0-2.3.5-3.2 1.5-1.8 1.9-3.6 3.5-6 4.3-4 1.4-6.9-2-6-6.2L11.4 31C12.6 25.2 16 22 20 22z'/%3E%3Crect x='17' y='30.5' width='10' height='3.2' rx='1.6' fill='%230e1120'/%3E%3Crect x='20.4' y='27.1' width='3.2' height='10' rx='1.6' fill='%230e1120'/%3E%3Ccircle cx='42' cy='34.5' r='2.8' fill='%230e1120'/%3E%3Ccircle cx='47.6' cy='29.6' r='2.8' fill='%230e1120'/%3E%3C/g%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       color-scheme: dark;
-      --night: #0e1120; --panel: #171b2e; --line: rgba(237, 239, 250, .07);
+      --night: #0b0e1b; --night-2: #11152a; --panel: #171b2e; --raised: #1e2340; --raised-2: #262c4d;
+      --line: rgba(237, 239, 250, .08);
       --text: #dde0f2; --strong: #f6f7ff; --muted: #8e94b5;
       --amber: #ffb84d; --amber-hover: #ffc978; --amber-ink: #2b1b00;
+      --live: #ff4d5e; --good: #3ddc84; --violet: #8b6cff;
+      --display: "Bricolage Grotesque", "DM Sans", system-ui, sans-serif;
     }
     * { box-sizing: border-box; }
-    html, body { min-height: 100%; margin: 0; }
-    body { background: var(--night); color: var(--text); font: 15px/1.5 "DM Sans", system-ui, "Segoe UI", sans-serif; }
-    main {
-      position: relative; min-height: 100vh; display: grid; place-content: center; justify-items: center;
-      gap: 16px; padding: 32px 16px; text-align: center; overflow: hidden;
+    html, body { margin: 0; }
+    body {
+      min-height: 100vh;
+      background: var(--night);
+      color: var(--text);
+      font: 16px/1.55 "DM Sans", system-ui, "Segoe UI", sans-serif;
+      overflow-x: hidden;
     }
-    main::before {
-      content: ""; position: absolute; width: min(560px, 90vw); aspect-ratio: 1; border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 184, 77, .3), transparent 65%); filter: blur(24px);
-      animation: drift 14s ease-in-out infinite alternate;
-    }
-    @keyframes drift { from { transform: translate(-12%, -8%) scale(.95); } to { transform: translate(12%, 8%) scale(1.08); } }
-    @media (prefers-reduced-motion: reduce) { main::before { animation: none; } }
-    main > * { position: relative; }
-    .icon { color: var(--amber); filter: drop-shadow(0 0 20px rgba(255, 184, 77, .45)); }
-    h1 { margin: 0; font: 700 clamp(44px, 9vw, 76px)/1 "Bricolage Grotesque", "DM Sans", sans-serif; letter-spacing: -.035em; color: var(--strong); }
-    p { margin: 0; max-width: 420px; color: var(--muted); }
-    .btn {
-      display: inline-block; padding: 12px 22px; border-radius: 12px; font-weight: 600; text-decoration: none;
-      background: var(--amber); color: var(--amber-ink); transition: background .15s;
-    }
-    .btn:hover { background: var(--amber-hover); }
-    ol {
-      max-width: 440px; margin: 8px 0 0; padding: 18px 18px 18px 38px; text-align: left;
-      background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
-    }
-    li + li { margin-top: 8px; }
-    strong { color: var(--strong); }
-    .note { font-size: 13px; }
-    a:not(.btn) { color: var(--amber); }
+    a { color: inherit; }
     [hidden] { display: none !important; }
+
+    /* ---------- Céu: degradê noturno, estrelas e duas luzes que respiram ---------- */
+    .sky {
+      position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background:
+        radial-gradient(1200px 700px at 78% 18%, rgba(139, 108, 255, .28), transparent 60%),
+        radial-gradient(900px 600px at 10% 90%, rgba(255, 184, 77, .14), transparent 60%),
+        linear-gradient(180deg, #0b0e1b 0%, #121638 55%, #0b0e1b 100%);
+    }
+    .stars, .stars::after {
+      position: absolute; inset: 0;
+      background-image:
+        radial-gradient(1.5px 1.5px at 12% 18%, #fff8 50%, transparent 51%),
+        radial-gradient(1px 1px at 28% 72%, #fff6 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 44% 32%, #fff7 50%, transparent 51%),
+        radial-gradient(1px 1px at 63% 12%, #fff9 50%, transparent 51%),
+        radial-gradient(2px 2px at 82% 46%, #ffd58f88 50%, transparent 51%),
+        radial-gradient(1px 1px at 91% 82%, #fff6 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 6% 58%, #fff5 50%, transparent 51%),
+        radial-gradient(1px 1px at 54% 88%, #fff7 50%, transparent 51%),
+        radial-gradient(2px 2px at 36% 8%, #b9a8ff88 50%, transparent 51%),
+        radial-gradient(1px 1px at 72% 64%, #fff5 50%, transparent 51%);
+      animation: twinkle 7s ease-in-out infinite alternate;
+    }
+    .stars::after { content: ""; transform: translate(9%, 23%) scale(1.3); animation-delay: -3.5s; }
+    @keyframes twinkle { from { opacity: .45; } to { opacity: 1; } }
+
+    /* ---------- Topo ---------- */
+    .top {
+      max-width: 1240px; margin: 0 auto; padding: 22px 24px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font: 800 24px var(--display); color: var(--strong); text-decoration: none; letter-spacing: -.02em; }
+    .brand svg { filter: drop-shadow(0 0 14px rgba(255, 184, 77, .5)); }
+    .top-link { font-weight: 600; font-size: 15px; color: var(--muted); text-decoration: none; transition: color .15s; }
+    .top-link:hover { color: var(--strong); }
+
+    /* ---------- Destaque ---------- */
+    .hero {
+      max-width: 1240px; margin: 0 auto; padding: 40px 24px 24px;
+      display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: center; gap: 56px;
+    }
+    h1 {
+      margin: 0; color: var(--strong);
+      font: 800 clamp(44px, 6.4vw, 88px)/.92 var(--display);
+      letter-spacing: -.035em; text-transform: uppercase;
+    }
+    h1 .hl {
+      background: linear-gradient(100deg, var(--amber) 10%, #ff8a5c 60%, #ff6fa8);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .lead { margin: 22px 0 0; max-width: 470px; font-size: 18px; color: var(--text); }
+    .ctas { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 32px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 15px 24px; border-radius: 16px;
+      font: 700 17px "DM Sans", sans-serif; text-decoration: none;
+      transition: transform .18s cubic-bezier(.2, .8, .2, 1), box-shadow .18s, background .15s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0) scale(.98); }
+    .btn-primary { background: #fff; color: #11152a; box-shadow: 0 10px 30px rgba(255, 255, 255, .12); }
+    .btn-primary:hover { box-shadow: 0 16px 40px rgba(255, 184, 77, .3); }
+    .btn-secondary { background: var(--amber); color: var(--amber-ink); box-shadow: 0 10px 30px rgba(255, 184, 77, .28); }
+    .btn-secondary:hover { background: var(--amber-hover); }
+    .fine { margin: 16px 0 0; font-size: 14px; color: var(--muted); }
+    .not-windows {
+      margin: 24px 0 0; max-width: 470px; padding: 14px 16px; border-radius: 14px;
+      background: var(--panel); border: 1px solid var(--line); color: var(--text);
+    }
+
+    /* ---------- A janela do D2 desenhada em código ---------- */
+    .stage-wrap { position: relative; }
+    .stage-wrap::before { /* a luz da TV vazando atrás */
+      content: ""; position: absolute; inset: 8% 4% 4% 10%; border-radius: 40px;
+      background: radial-gradient(closest-side, rgba(255, 138, 92, .55), rgba(139, 108, 255, .35) 60%, transparent);
+      filter: blur(50px); animation: breathe 6s ease-in-out infinite;
+    }
+    @keyframes breathe { 0%, 100% { opacity: .55; transform: scale(.97); } 50% { opacity: .9; transform: scale(1.03); } }
+    .app {
+      position: relative; display: grid; grid-template-columns: 170px 1fr;
+      aspect-ratio: 16 / 10.4; border-radius: 18px; overflow: hidden;
+      background: var(--night-2); border: 1px solid rgba(255, 255, 255, .1);
+      box-shadow: 0 40px 100px rgba(0, 0, 0, .55), 0 0 0 1px rgba(0, 0, 0, .4);
+      animation: float 9s ease-in-out infinite;
+    }
+    @keyframes float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -12px; } }
+    .side { padding: 14px 10px; background: var(--panel); border-right: 1px solid var(--line); font-size: 12px; }
+    .side-brand { display: flex; align-items: center; gap: 6px; font: 800 15px var(--display); color: var(--strong); margin: 0 4px 14px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 10px var(--amber); }
+    .side-label { margin: 0 4px 6px; color: var(--muted); font-size: 10.5px; font-weight: 600; }
+    .ch { display: flex; align-items: center; gap: 6px; padding: 6px 7px; border-radius: 8px; color: var(--muted); font-weight: 600; }
+    .ch.on { background: var(--raised-2); color: var(--strong); box-shadow: inset 2px 0 0 var(--amber); }
+    .mem { display: flex; align-items: center; gap: 6px; padding: 4px 7px 4px 18px; color: var(--text); }
+    .av { width: 16px; height: 16px; border-radius: 50%; flex: none; }
+    .live {
+      margin-left: auto; padding: 1px 6px; border-radius: 99px; font-size: 9px; font-weight: 700;
+      color: #ffb3bb; background: rgba(255, 77, 94, .18); white-space: nowrap;
+    }
+    .live::before { content: "● "; color: var(--live); }
+    .main { display: grid; grid-template-rows: auto 1fr; padding: 12px 14px 14px; gap: 10px; min-width: 0; }
+    .bar { display: flex; align-items: center; gap: 8px; }
+    .bar-title { font: 800 14px var(--display); color: var(--strong); margin-right: auto; }
+    .pill { padding: 5px 10px; border-radius: 9px; font-size: 10.5px; font-weight: 700; }
+    .pill.share { background: rgba(255, 77, 94, .2); color: #ff9aa5; }
+    .pill.q { background: var(--raised); color: var(--text); }
+    .tile { position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255, 255, 255, .08); min-height: 0; }
+
+    /* O "jogo" na tela: desenho vetorial (fica nítido em qualquer tamanho), estilo synthwave */
+    .game { position: absolute; inset: 0; background: #120d3a; }
+    .scene { display: block; width: 100%; height: 100%; }
+    .chip {
+      position: absolute; top: 9px; padding: 3px 9px; border-radius: 99px;
+      font-size: 10.5px; font-weight: 700; color: #fff; background: rgba(14, 17, 32, .72); backdrop-filter: blur(6px);
+    }
+    .chip.ping { left: 9px; }
+    .chip.ping::before { content: "● "; color: var(--good); }
+    .chip.watch { right: 9px; }
+    .tile-name {
+      position: absolute; left: 0; right: 0; bottom: 0; padding: 18px 12px 9px;
+      font: 700 12px var(--display); color: #fff; background: linear-gradient(transparent, rgba(14, 17, 32, .85));
+    }
+    .tile-name::before { content: "● "; color: var(--live); }
+
+    /* Balões em volta da janela */
+    .float-card {
+      position: absolute; z-index: 2; display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; border-radius: 14px; font-size: 13.5px; font-weight: 600; color: var(--strong);
+      background: rgba(23, 27, 46, .88); border: 1px solid rgba(255, 255, 255, .1); backdrop-filter: blur(10px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, .45);
+      animation: bob 7s ease-in-out infinite;
+    }
+    .float-card .ico { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 10px; font-size: 16px; }
+    .fc-1 { left: -4%; bottom: 10%; }
+    .fc-1 .ico { background: rgba(61, 220, 132, .16); }
+    .fc-2 { right: -2%; top: -4%; animation-delay: -3.5s; }
+    .fc-2 .ico { background: rgba(255, 184, 77, .18); }
+    @keyframes bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
+
+    /* ---------- Recursos ---------- */
+    section { max-width: 1240px; margin: 0 auto; padding: 72px 24px 0; }
+    h2 { margin: 0 0 28px; font: 800 clamp(30px, 3.6vw, 44px)/1.05 var(--display); letter-spacing: -.03em; color: var(--strong); }
+    .features { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .feature {
+      padding: 26px; border-radius: 22px; background: linear-gradient(180deg, rgba(30, 35, 64, .8), rgba(23, 27, 46, .8));
+      border: 1px solid var(--line); transition: transform .2s, border-color .2s;
+    }
+    .feature:hover { transform: translateY(-4px); border-color: rgba(255, 184, 77, .35); }
+    .ico-tile {
+      display: grid; place-items: center; width: 48px; height: 48px; border-radius: 14px;
+      color: var(--amber); background: rgba(255, 184, 77, .12); box-shadow: inset 0 0 0 1px rgba(255, 184, 77, .22);
+    }
+    .feature h3 { margin: 16px 0 8px; font: 700 20px var(--display); color: var(--strong); letter-spacing: -.01em; }
+    .feature p { margin: 0; color: var(--muted); }
+
+    /* ---------- Como instalar ---------- */
+    .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; counter-reset: step; }
+    .step { position: relative; padding: 26px 24px 24px; border-radius: 22px; background: var(--panel); border: 1px solid var(--line); }
+    .step::before {
+      counter-increment: step; content: counter(step);
+      display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; margin-bottom: 14px;
+      font: 800 18px var(--display); color: var(--amber-ink); background: var(--amber);
+    }
+    .step strong { color: var(--strong); }
+    .step p { margin: 0; }
+    .smartscreen {
+      margin-top: 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+      font-size: 13px; color: var(--muted);
+    }
+    .fake-btn { padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, .25); color: var(--strong); font-weight: 600; }
+
+    /* ---------- Rodapé ---------- */
+    .final { text-align: center; padding-top: 88px; }
+    .final h2 { margin-bottom: 12px; }
+    .final p { margin: 0 auto; max-width: 520px; color: var(--muted); }
+    .final .ctas { justify-content: center; }
+    footer { max-width: 1240px; margin: 72px auto 0; padding: 24px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
+
+    /* ---------- Entrada suave ---------- */
+    .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s cubic-bezier(.2, .8, .2, 1), transform .7s cubic-bezier(.2, .8, .2, 1); }
+    .reveal.in { opacity: 1; transform: none; }
+
+    @media (max-width: 960px) {
+      .hero { grid-template-columns: 1fr; gap: 56px; padding-top: 16px; }
+      .features, .steps { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .app { grid-template-columns: 1fr; }
+      .side { display: none; }
+      .float-card { font-size: 12px; padding: 8px 10px; }
+      .fc-1 { left: 2%; bottom: -6%; }
+      .fc-2 { right: 2%; top: -8%; }
+      .btn { width: 100%; justify-content: center; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
   </style>
 </head>
 <body>
-  <main>
-    <div class="icon"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2.5"/><path d="M8 20h8M12 16v4"/></svg></div>
-    <h1>D2</h1>
-    <p>O programa para Windows: tela mais estável, sem o navegador no meio, e sempre atualizado sozinho.</p>
-    <a id="download-btn" class="btn" href="https://github.com/Bibiano001/d2-desktop/releases/latest/download/D2-Setup.exe">Baixar para Windows</a>
-    <p id="not-windows" hidden>Por enquanto o programa é só para Windows. Neste aparelho, use o D2 no navegador.</p>
-    <ol>
-      <li>Abra o <strong>D2-Setup.exe</strong> que foi baixado.</li>
-      <li>Se o Windows mostrar "O Windows protegeu o computador", clique em <strong>Mais informações</strong> e depois em <strong>Executar assim mesmo</strong>. Esse aviso aparece porque o programa ainda não tem assinatura digital paga.</li>
-      <li>Pronto: o D2 abre sozinho. Entre com a sua conta do Discord.</li>
-    </ol>
-    <p class="note">Windows 10 ou 11, 64 bits. Prefere não instalar? <a href="https://discord2-4ifw.onrender.com/">Use o D2 no navegador</a>.</p>
+  <div class="sky" aria-hidden="true"><div class="stars"></div></div>
+
+  <header class="top">
+    <a class="brand" href="https://discord2-4ifw.onrender.com/">
+      <svg width="34" height="34" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#171b2e"/><g transform="translate(32 32) scale(1.18) translate(-32.6 -35.4)"><path fill="#ffb84d" d="M20 22h24c5 0 8.5 3.2 9.8 9l2.6 11.6c.9 4.2-2 7.6-6 6.2-2.4-.8-4.2-2.4-6-4.3-.9-1-2-1.5-3.2-1.5H24c-1.2 0-2.3.5-3.2 1.5-1.8 1.9-3.6 3.5-6 4.3-4 1.4-6.9-2-6-6.2L11.4 31C12.6 25.2 16 22 20 22z"/><rect x="17" y="30.5" width="10" height="3.2" rx="1.6" fill="#171b2e"/><rect x="20.4" y="27.1" width="3.2" height="10" rx="1.6" fill="#171b2e"/><circle cx="42" cy="34.5" r="2.8" fill="#171b2e"/><circle cx="47.6" cy="29.6" r="2.8" fill="#171b2e"/></g></svg>
+      D2
+    </a>
+    <a class="top-link" href="https://discord2-4ifw.onrender.com/">Abrir no navegador →</a>
+  </header>
+
+  <main class="hero">
+    <div class="reveal">
+      <h1>Sua tela,<br>ao vivo,<br><span class="hl">pros amigos.</span></h1>
+      <p class="lead">Mostre o jogo, o vídeo ou o que quiser para a galera, com o som de verdade. É só entrar com a conta do Discord e escolher um canal.</p>
+      <div class="ctas">
+        <a id="download-btn" class="btn btn-primary" href="https://github.com/Bibiano001/d2-desktop/releases/latest/download/D2-Setup.exe">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>
+          Baixar para Windows
+        </a>
+        <a class="btn btn-secondary" href="https://discord2-4ifw.onrender.com/">Abrir o D2 no navegador</a>
+      </div>
+      <p class="fine" id="fine">Grátis · Windows 10 ou 11 (64 bits) · <span id="version">sempre na última versão</span></p>
+      <p class="not-windows" id="not-windows" hidden>O programa por enquanto é só para Windows. Neste aparelho, use o D2 no navegador: dá para assistir à tela dos amigos normalmente.</p>
+    </div>
+
+    <div class="stage-wrap reveal" aria-hidden="true">
+      <div class="app">
+        <aside class="side">
+          <div class="side-brand"><span class="dot"></span>D2</div>
+          <div class="side-label">Canais de tela</div>
+          <div class="ch on">▭ Geral1</div>
+          <div class="mem"><span class="av" style="background:#ff8a5c"></span>Talisson<span class="live">ao vivo</span></div>
+          <div class="mem"><span class="av" style="background:#8b6cff"></span>Dk</div>
+          <div class="mem"><span class="av" style="background:#3ddc84"></span>Igor</div>
+          <div class="ch">▭ Geral2</div>
+          <div class="ch">▭ Geral3</div>
+        </aside>
+        <div class="main">
+          <div class="bar">
+            <span class="bar-title">▭ Geral1</span>
+            <span class="pill q">Jogo</span>
+            <span class="pill share">Parar</span>
+          </div>
+          <div class="tile">
+            <div class="game">
+              <svg class="scene" viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#120d3a"/><stop offset=".45" stop-color="#3b1d6e"/>
+                    <stop offset=".8" stop-color="#b8428c"/><stop offset="1" stop-color="#ff7a8a"/>
+                  </linearGradient>
+                  <linearGradient id="sunfill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#ffe58f"/><stop offset=".55" stop-color="#ffab5c"/><stop offset="1" stop-color="#ff5fa2"/>
+                  </linearGradient>
+                  <radialGradient id="sunglow"><stop offset=".45" stop-color="#ff9a6b" stop-opacity=".55"/><stop offset="1" stop-color="#ff9a6b" stop-opacity="0"/></radialGradient>
+                  <mask id="sunmask">
+                    <rect width="800" height="450" fill="#fff"/>
+                    <g fill="#000"><rect y="178" width="800" height="4"/><rect y="194" width="800" height="6"/><rect y="212" width="800" height="8"/><rect y="232" width="800" height="10"/><rect y="254" width="800" height="12"/></g>
+                  </mask>
+                  <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a0f4a"/><stop offset="1" stop-color="#0b0618"/></linearGradient>
+                  <linearGradient id="haze" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff7ab0" stop-opacity=".55"/><stop offset="1" stop-color="#ff7ab0" stop-opacity="0"/></linearGradient>
+                </defs>
+                <rect width="800" height="272" fill="url(#sky)"/>
+                <g fill="#fff"><circle cx="60" cy="40" r="1.6"><animate attributeName="opacity" values=".2;1;.2" dur="3s" begin="-0s" repeatCount="indefinite"/></circle><circle cx="150" cy="90" r="1.1"><animate attributeName="opacity" values=".2;1;.2" dur="4s" begin="-1s" repeatCount="indefinite"/></circle><circle cx="240" cy="30" r="1.4"><animate attributeName="opacity" values=".2;1;.2" dur="3.5s" begin="-2s" repeatCount="indefinite"/></circle><circle cx="330" cy="70" r="1"><animate attributeName="opacity" values=".2;1;.2" dur="5s" begin="-1s" repeatCount="indefinite"/></circle><circle cx="520" cy="45" r="1.5"><animate attributeName="opacity" values=".2;1;.2" dur="4s" begin="-3s" repeatCount="indefinite"/></circle><circle cx="610" cy="95" r="1.1"><animate attributeName="opacity" values=".2;1;.2" dur="3s" begin="-2s" repeatCount="indefinite"/></circle><circle cx="700" cy="35" r="1.6"><animate attributeName="opacity" values=".2;1;.2" dur="4.5s" begin="-0s" repeatCount="indefinite"/></circle><circle cx="760" cy="110" r="1"><animate attributeName="opacity" values=".2;1;.2" dur="3.5s" begin="-1s" repeatCount="indefinite"/></circle><circle cx="450" cy="20" r="1.2"><animate attributeName="opacity" values=".2;1;.2" dur="5s" begin="-2s" repeatCount="indefinite"/></circle><circle cx="90" cy="140" r="1"><animate attributeName="opacity" values=".2;1;.2" dur="4s" begin="-3s" repeatCount="indefinite"/></circle></g>
+                <circle cx="400" cy="165" r="180" fill="url(#sunglow)"/>
+                <circle cx="400" cy="165" r="100" fill="url(#sunfill)" mask="url(#sunmask)"/>
+                <g fill="#3a1c6b" opacity=".9"><path d="M 0 272 L 0 253 C 45 253 45 198 90 198 C 130 198 130 230 170 230 C 215 230 215 166 260 166 C 305 166 305 218 350 218 C 395 218 395 188 440 188 C 480 188 480 236 520 236 C 565 236 565 176 610 176 C 655 176 655 224 700 224 C 750 224 750 253 800 253 C 845 253 845 198 890 198 C 930 198 930 230 970 230 C 1015 230 1015 166 1060 166 C 1105 166 1105 218 1150 218 C 1195 218 1195 188 1240 188 C 1280 188 1280 236 1320 236 C 1365 236 1365 176 1410 176 C 1455 176 1455 224 1500 224 C 1550 224 1550 253 1600 253 L 1600 272 Z"><animateTransform attributeName="transform" type="translate" from="0 0" to="-800 0" dur="60s" repeatCount="indefinite"/></path></g>
+                <g fill="#1f0f3d"><path d="M 0 272 L 0 256 C 35 256 35 232 70 232 C 110 232 110 254 150 254 C 195 254 195 214 240 214 C 285 214 285 248 330 248 C 375 248 375 224 420 224 C 460 224 460 258 500 258 C 545 258 545 220 590 220 C 640 220 640 250 690 250 C 745 250 745 256 800 256 C 835 256 835 232 870 232 C 910 232 910 254 950 254 C 995 254 995 214 1040 214 C 1085 214 1085 248 1130 248 C 1175 248 1175 224 1220 224 C 1260 224 1260 258 1300 258 C 1345 258 1345 220 1390 220 C 1440 220 1440 250 1490 250 C 1545 250 1545 256 1600 256 L 1600 272 Z"><animateTransform attributeName="transform" type="translate" from="0 0" to="-800 0" dur="30s" repeatCount="indefinite"/></path></g>
+                <rect y="270" width="800" height="180" fill="url(#floor)"/>
+                <rect y="268" width="800" height="26" fill="url(#haze)"/>
+                <g stroke="#ff5fa2" stroke-width="1.6" stroke-opacity=".75"><line x1="304" y1="270" x2="-800" y2="450"/><line x1="312" y1="270" x2="-700" y2="450"/><line x1="320" y1="270" x2="-600" y2="450"/><line x1="328" y1="270" x2="-500" y2="450"/><line x1="336" y1="270" x2="-400" y2="450"/><line x1="344" y1="270" x2="-300" y2="450"/><line x1="352" y1="270" x2="-200" y2="450"/><line x1="360" y1="270" x2="-100" y2="450"/><line x1="368" y1="270" x2="0" y2="450"/><line x1="376" y1="270" x2="100" y2="450"/><line x1="384" y1="270" x2="200" y2="450"/><line x1="392" y1="270" x2="300" y2="450"/><line x1="400" y1="270" x2="400" y2="450"/><line x1="408" y1="270" x2="500" y2="450"/><line x1="416" y1="270" x2="600" y2="450"/><line x1="424" y1="270" x2="700" y2="450"/><line x1="432" y1="270" x2="800" y2="450"/><line x1="440" y1="270" x2="900" y2="450"/><line x1="448" y1="270" x2="1000" y2="450"/><line x1="456" y1="270" x2="1100" y2="450"/><line x1="464" y1="270" x2="1200" y2="450"/><line x1="472" y1="270" x2="1300" y2="450"/><line x1="480" y1="270" x2="1400" y2="450"/><line x1="488" y1="270" x2="1500" y2="450"/><line x1="496" y1="270" x2="1600" y2="450"/></g>
+                <g stroke="#ff7ab0" stroke-width="1.8"><line x1="-200" x2="1000" y1="271" y2="271"><animate attributeName="y1" values="271;452" dur="3s" begin="0.0s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.6 0 1 1"/><animate attributeName="y2" values="271;452" dur="3s" begin="0.0s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.6 0 1 1"/><animate attributeName="stroke-opacity" values="0;1" dur="3s" begin="0.0s" repeatCount="indefinite" keyTimes="0;1" calcMode="spline" keySplines="0 .6 .4 1"/></line><line x1="-200" x2="1000" y1="271" y2="271"><animate attributeName="y1" values="271;452" dur="3s" begin="-0.5s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.6 0 1 1"/><animate attributeName="y2" values="271;452" dur="3s" begin="-0.5s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.6 0 1 1"/><animate attributeName="stroke-opacity" values="0;1" dur="3s" begin="-0.5s" repeatCount="indefinite" keyTimes="0;1" calcMode="spline" keySplines="0 .6 .4 1"/></line><line x1="-200" x2="1000" y1="271" y2="271"><animate attributeName="y1" values="271;452" dur="3s" begin="-1.0s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.6 0 1 1"/><animate attributeName="y2" values="271;452" dur="3s" begin="-1.0s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.6 0 1 1"/><animate attributeName="stroke-opacity" values="0;1" dur="3s" begin="-1.0s" repeatCount="indefinite" keyTimes="0;1" calcMode="spline" keySplines="0 .6 .4 1"/></line><line x1="-200" x2="1000" y1="271" y2="271"><animate attributeName="y1" values="271;452" dur="3s" begin="-1.5s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.6 0 1 1"/><animate attributeName="y2" values="271;452" dur="3s" begin="-1.5s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.6 0 1 1"/><animate attributeName="stroke-opacity" values="0;1" dur="3s" begin="-1.5s" repeatCount="indefinite" keyTimes="0;1" calcMode="spline" keySplines="0 .6 .4 1"/></line><line x1="-200" x2="1000" y1="271" y2="271"><animate attributeName="y1" values="271;452" dur="3s" begin="-2.0s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.6 0 1 1"/><animate attributeName="y2" values="271;452" dur="3s" begin="-2.0s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.6 0 1 1"/><animate attributeName="stroke-opacity" values="0;1" dur="3s" begin="-2.0s" repeatCount="indefinite" keyTimes="0;1" calcMode="spline" keySplines="0 .6 .4 1"/></line><line x1="-200" x2="1000" y1="271" y2="271"><animate attributeName="y1" values="271;452" dur="3s" begin="-2.5s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.6 0 1 1"/><animate attributeName="y2" values="271;452" dur="3s" begin="-2.5s" repeatCount="indefinite" calcMode="spline" keyTimes="0;1" keySplines="0.6 0 1 1"/><animate attributeName="stroke-opacity" values="0;1" dur="3s" begin="-2.5s" repeatCount="indefinite" keyTimes="0;1" calcMode="spline" keySplines="0 .6 .4 1"/></line></g>
+                <rect y="269" width="800" height="2.5" fill="#ffc2dd" opacity=".9"/>
+              </svg>
+            </div>
+            <span class="chip ping">18 ms</span>
+            <span class="chip watch">👁 2 assistindo</span>
+            <span class="tile-name">Talisson</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
+
+  <section>
+    <h2 class="reveal">Feito para jogar junto</h2>
+    <div class="features">
+      <article class="feature reveal">
+        <span class="ico-tile"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10a5 5 0 0 1 4.9 6l-.6 3a3 3 0 0 1-5.2 1.4L14.6 16H9.4l-1.5 1.4A3 3 0 0 1 2.7 16l-.6-3A5 5 0 0 1 7 7z"/><path d="M8 10v4M6 12h4"/><circle cx="16" cy="11" r=".8" fill="currentColor"/><circle cx="17.5" cy="13.5" r=".8" fill="currentColor"/></svg></span>
+        <h3>Modo Jogo</h3>
+        <p>Até 60 quadros por segundo em Full HD.</p>
+      </article>
+      <article class="feature reveal">
+        <span class="ico-tile"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+        <h3>Salas com senha</h3>
+        <p>Crie uma sala só para a sua turma.</p>
+      </article>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="reveal">Instalar leva um minuto</h2>
+    <div class="steps">
+      <div class="step reveal">
+        <p>Clique em <strong>Baixar para Windows</strong> e abra o <strong>D2-Setup.exe</strong>.</p>
+      </div>
+      <div class="step reveal">
+        <p>Se aparecer <strong>"O Windows protegeu o computador"</strong>, é normal: o programa ainda não tem assinatura digital paga.</p>
+        <div class="smartscreen"><span class="fake-btn">Mais informações</span> → <span class="fake-btn">Executar assim mesmo</span></div>
+      </div>
+      <div class="step reveal">
+        <p>O D2 abre sozinho. <strong>Entre com a sua conta do Discord</strong>, escolha um canal e chame a galera.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="final">
+    <h2 class="reveal">Bora compartilhar?</h2>
+    <p class="reveal">Quem só vai assistir pode entrar pelo navegador, sem instalar nada.</p>
+    <div class="ctas reveal">
+      <a class="btn btn-primary dl" href="https://github.com/Bibiano001/d2-desktop/releases/latest/download/D2-Setup.exe">Baixar para Windows</a>
+      <a class="btn btn-secondary" href="https://discord2-4ifw.onrender.com/">Abrir no navegador</a>
+    </div>
+  </section>
+
+  <footer>
+    <span>D2 · compartilhamento de tela entre amigos</span>
+    <span>Não é um produto do Discord.</span>
+  </footer>
+
   <script>
     // Fora do Windows, o botão baixaria um arquivo que não abre: troca por um aviso.
     if (!/Windows/.test(navigator.userAgent)) {
-      document.getElementById('download-btn').hidden = true;
+      document.querySelectorAll('#download-btn, .dl').forEach((el) => { el.hidden = true; });
       document.getElementById('not-windows').hidden = false;
+      document.getElementById('fine').hidden = true;
+    }
+
+    // Número da última versão, direto do GitHub (se não der, fica "sempre na última versão").
+    fetch('https://api.github.com/repos/Bibiano001/d2-desktop/releases/latest')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((release) => {
+        const tag = release && typeof release.tag_name === 'string' ? release.tag_name.replace(/^v/, '') : '';
+        if (/^\d+\.\d+\.\d+$/.test(tag)) document.getElementById('version').textContent = `versão ${tag}`;
+      })
+      .catch(() => {});
+
+    // Os blocos aparecem suavemente quando chegam na tela.
+    const items = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+      const seen = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) { entry.target.classList.add('in'); seen.unobserve(entry.target); }
+        }
+      }, { threshold: 0.12 });
+      items.forEach((el, i) => { el.style.transitionDelay = `${(i % 3) * 80}ms`; seen.observe(el); });
+    } else {
+      items.forEach((el) => el.classList.add('in'));
     }
   </script>
 </body>
